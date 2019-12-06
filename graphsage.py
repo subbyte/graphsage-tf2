@@ -6,7 +6,7 @@ init_fn = tf.keras.initializers.GlorotUniform
 
 class GraphSage(tf.keras.Model):
     """
-    compute embedding for target nodes
+    embed nodes and classify them with labels
     """
 
     def __init__(self, raw_features, internal_dim, num_classes):
@@ -50,18 +50,6 @@ class RawFeature(tf.keras.layers.Layer):
         return tf.gather(self.features, nodes)
 
 class MeanAggregator(tf.keras.layers.Layer):
-    """
-    Usage (forward):
-    1. agg = MeanAggregator(adj_mat, dst_dim)
-    2. dstsrc = agg.get_associated_nodes(dst_nodes) 
-       # dstsrc is the dst_nodes for the previous layer
-       # this step will also prepare the diffusion matrix
-    3. embeddings = agg(features)
-       # features is the embedding from the previous layer
-       # there are #(dstsrc) features
-       # there are #(dst_nodes) embedding outputs
-    """
-    
     def __init__(self, src_dim, dst_dim, **kwargs):
         """
         :param int src_dim: input dimension
@@ -79,6 +67,12 @@ class MeanAggregator(tf.keras.layers.Layer):
                                 )
     
     def call(self, dstsrc_features, dstsrc2dst, dstsrc2src, dif_mat):
+        """
+        :param tensor dstsrc_features: the embedding from the previous layer
+        :param tensor dstsrc2dst: 1d boolean mask (prepraed by minibatch generator)
+        :param tensor dstsrc2src: 1d boolean mask (prepraed by minibatch generator)
+        :param tensor dif_mat: 2d diffusion matrix (prepraed by minibatch generator)
+        """
         dst_features = tf.boolean_mask(dstsrc_features, dstsrc2dst)
         src_features = tf.boolean_mask(dstsrc_features, dstsrc2src)
         aggregated_features = tf.matmul(dif_mat, src_features)
