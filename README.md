@@ -15,7 +15,7 @@ This is a TensorFlow 2 implementation of graphsage-simple:
 
 ### Design Choices
 1. Computing diffusion matrix and bitmask for node feature and neighbor concatenation outside TensorFlow (in minibatch.py) since I do not find a good way to sample neighbors in an adjancy matrix within `tf.function`. If possible, the code can be simpler without passing more than one argument tensors to the forward pass.
-2. `fit` and `fit_generator` in `tf.keras.Model` do not support more than one arguments, so I need manually writing the training loop with `tf.GradientTape()`.
+2. `fit` and `fit_generator` in `tf.keras.Model` do not support more than one arguments, so I manually write the training loop with `tf.GradientTape()`.
 
 ### Prilimary Performance Evaluation
 
