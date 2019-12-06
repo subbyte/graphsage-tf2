@@ -1,6 +1,6 @@
 # TensorFlow 2 Implementation of GraphSage
 
-This is an implementation of graphsage-simple:
+This is a TensorFlow 2 implementation of graphsage-simple:
 - original PyTorch version: https://github.com/williamleif/graphsage-simple
 - version with Python 3 and PyTorch 1.3: https://github.com/subbyte/graphsage-simple
 
