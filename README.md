@@ -8,4 +8,4 @@ It includes training/testing on the cora dataset.
 
 Given the same size of minibatch (256 units), this TensorFlow version is 25% faster on CPU. The average batch time in training with 32-core CPU:
 - graphsage-simple (PyTorch): 0.038063554763793944s
-- this version (TensorFlow 2): 0.02766340970993042s
+- graphsage-tf2 (TensorFlow): 0.02766340970993042s
