@@ -3,6 +3,13 @@
 import numpy as np
 import random
 
+class Batch:
+    def __init__ (self, src_nodes, dif_mat, dstsrc2src, dstsrc2dst):
+        self.src_nodes = src_nodes
+        self.dif_mats = dif_mat
+        self.dstsrc2srcs = dstsrc2src
+        self.dstsrc2dsts = dstsrc2dst
+
 def build_batch(num_layers, nodes, neigh_dict, sample_size):
     """
     :param int num_layers: number of layers
@@ -30,15 +37,7 @@ def build_batch(num_layers, nodes, neigh_dict, sample_size):
 
     src_nodes = dst_nodes.pop()
     
-    return {
-        "src_nodes": src_nodes,
-        "dif_mat_0": dif_mat[0],
-        "dif_mat_1": dif_mat[1],
-        "dstsrc2src_0": dstsrc2src[0],
-        "dstsrc2src_1": dstsrc2src[1],
-        "dstsrc2dst_0": dstsrc2dst[0],
-        "dstsrc2dst_1": dstsrc2dst[1]
-    }
+    return Batch(src_nodes, dif_mat, dstsrc2src, dstsrc2dst)
 
 ################################################################
 #                       Private Functions                      #

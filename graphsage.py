@@ -9,26 +9,44 @@ class GraphSage(tf.keras.Model):
     embed nodes and classify them with labels
     """
 
-    def __init__(self, raw_features, internal_dim, num_classes):
+    def __init__(self, raw_features, internal_dim, num_layers, num_classes):
+
+        assert num_layers > 0, 'illegal parameter "num_layers"'
+        assert internal_dim > 0, 'illegal parameter "internal_dim"'
+
         super().__init__()
-        self.level_0 = RawFeature(raw_features)
-        self.level_1 = MeanAggregator(raw_features.shape[-1], internal_dim, name="agg_lv1")
-        self.level_2 = MeanAggregator(internal_dim, internal_dim, name="agg_lv2")
-        self.classifier = tf.keras.layers.Dense( num_classes
-                                               , activation = tf.nn.softmax
-                                               , use_bias = False
-                                               , kernel_initializer = init_fn
-                                               , name = "classifier"
-                                               )
+
+        self.input_layer = RawFeature(raw_features)
+
+        self.seq_layers = []
+        for i in range (1, num_layers + 1):
+            layer_name = "agg_lv" + str(i)
+            input_dim = internal_dim if i > 1 else raw_features.shape[-1]
+            aggregator_layer = MeanAggregator(input_dim, internal_dim, name=layer_name)
+            self.seq_layers.append(aggregator_layer)
+
+        self.classifier = tf.keras.layers.Dense ( num_classes
+                                                , activation = tf.nn.softmax
+                                                , use_bias = False
+                                                , kernel_initializer = init_fn
+                                                , name = "classifier"
+                                                )
 
     def call(self, minibatch):
         """
         :param [node] nodes: target nodes for embedding
         """
-        x = self.level_0(tf.squeeze(minibatch["src_nodes"]))
-        x = self.level_1(x, minibatch["dstsrc2dst_1"], minibatch["dstsrc2src_1"], minibatch["dif_mat_1"])
-        x = self.level_2(x, minibatch["dstsrc2dst_0"], minibatch["dstsrc2src_0"], minibatch["dif_mat_0"])
+        x = self.input_layer(tf.squeeze(minibatch.src_nodes))
+
+        for aggregator_layer in self.seq_layers:
+            x = aggregator_layer ( x
+                                 , minibatch.dstsrc2dsts.pop()
+                                 , minibatch.dstsrc2srcs.pop()
+                                 , minibatch.dif_mats.pop()
+                                 )
+
         y = self.classifier(x)
+
         return y
 
 ################################################################

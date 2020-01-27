@@ -11,10 +11,12 @@ from sklearn.metrics import f1_score
 from minibatch import build_batch
 from graphsage import GraphSage
 
-# NN parameters
+#### NN parameters
 SAMPLE_SIZE = 5
 INTERNAL_DIM = 128
-# training parameters
+# number of layers, a positive integer
+NUM_LAYERS = 2
+#### training parameters
 BATCH_SIZE = 256
 TRAINING_STEPS = 100
 LEARNING_RATE = 0.5
@@ -49,7 +51,7 @@ def load_cora():
 def run_cora():
     num_nodes, raw_features, labels, num_classes, neigh_dict = load_cora()
 
-    graphsage = GraphSage(raw_features, INTERNAL_DIM, num_classes)
+    graphsage = GraphSage(raw_features, INTERNAL_DIM, NUM_LAYERS, num_classes)
 
     all_nodes = np.random.permutation(num_nodes)
     train_nodes = all_nodes[:2048]
@@ -60,7 +62,7 @@ def run_cora():
         random.shuffle(nodes_for_training)
         while True:
             mini_batch_nodes = nodes_for_training[:batch_size]
-            batch = build_batch(2, mini_batch_nodes, neigh_dict, SAMPLE_SIZE)
+            batch = build_batch(NUM_LAYERS, mini_batch_nodes, neigh_dict, SAMPLE_SIZE)
             labels = all_labels[mini_batch_nodes]
             yield (batch, labels)
 
@@ -83,7 +85,7 @@ def run_cora():
         print("Loss:", loss.numpy())
 
     # testing
-    results = graphsage(build_batch(2, test_nodes, neigh_dict, SAMPLE_SIZE))
+    results = graphsage(build_batch(NUM_LAYERS, test_nodes, neigh_dict, SAMPLE_SIZE))
     score = f1_score(labels[test_nodes], results.numpy().argmax(axis=1), average="micro")
     print("Validation F1: ", score)
     print("Average batch time: ", np.mean(times))
