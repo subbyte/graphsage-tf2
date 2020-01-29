@@ -18,7 +18,6 @@ python3 supervised.py
 - It includes training/testing on the cora dataset.
 - It only run in the supervised mode.
 - It only has MeanAggregator.
-- It only has two layers hard-coded.
 - It only has CPU support.
 
 ### Design Choices
