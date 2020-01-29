@@ -1,14 +1,8 @@
 #!/usr/bin/env python3
 
 import numpy as np
+import collections
 import random
-
-class Batch:
-    def __init__ (self, src_nodes, dif_mat, dstsrc2src, dstsrc2dst):
-        self.src_nodes = src_nodes
-        self.dif_mats = dif_mat
-        self.dstsrc2srcs = dstsrc2src
-        self.dstsrc2dsts = dstsrc2dst
 
 def build_batch(num_layers, nodes, neigh_dict, sample_size):
     """
@@ -16,11 +10,11 @@ def build_batch(num_layers, nodes, neigh_dict, sample_size):
     :param [int] nodes: node ids
     :param {node:[node]} neigh_dict: BIDIRECTIONAL adjacency matrix in dict
     :param int sample_size: sample size
-    :return dict minibatch
+    :return namedtuple minibatch
         "src_nodes": node ids to retrieve from raw feature and feed to the first layer
-        "dstsrc2dst": list of dstsrc2dst matrices from last to first layer
-        "dstsrc2src": list of dstsrc2src matrices from last to first layer
-        "dif_mat": list of dif_mat matrices from last to first layer
+        "dstsrc2dsts": list of dstsrc2dst matrices from last to first layer
+        "dstsrc2srcs": list of dstsrc2src matrices from last to first layer
+        "dif_mats": list of dif_mat matrices from last to first layer
     """
     
     dst_nodes = [nodes]
@@ -29,7 +23,10 @@ def build_batch(num_layers, nodes, neigh_dict, sample_size):
     dif_mat = []
 
     for _ in range(num_layers):
-        ds, d2d, d2s, dm = compute_diffusion_matrix_mean(dst_nodes[-1], neigh_dict, sample_size)
+        ds, d2d, d2s, dm = compute_diffusion_matrix_mean ( dst_nodes[-1]
+                                                         , neigh_dict
+                                                         , sample_size
+                                                         )
         dst_nodes.append(ds)
         dstsrc2dst.append(d2d)
         dstsrc2src.append(d2s)
@@ -37,7 +34,10 @@ def build_batch(num_layers, nodes, neigh_dict, sample_size):
 
     src_nodes = dst_nodes.pop()
     
-    return Batch(src_nodes, dif_mat, dstsrc2src, dstsrc2dst)
+    MiniBatchFields = ["src_nodes", "dif_mats", "dstsrc2srcs", "dstsrc2dsts"]
+    MiniBatch = collections.namedtuple ("MiniBatch", MiniBatchFields)
+
+    return MiniBatch(src_nodes, dif_mat, dstsrc2src, dstsrc2dst)
 
 ################################################################
 #                       Private Functions                      #

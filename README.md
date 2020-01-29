@@ -2,9 +2,15 @@
 
 GraphSAGE: https://github.com/williamleif/GraphSAGE
 
-This is a TensorFlow 2 implementation of graphsage-simple:
+This is a TensorFlow 2 implementation of graphsage-simple in Python 3:
 - original PyTorch version: https://github.com/williamleif/graphsage-simple
 - version with Python 3 and PyTorch 1.3: https://github.com/subbyte/graphsage-simple
+
+### How to Run 
+
+It requires both `tensorflow` and `scikit-learn` packages. If you are using TensorFlow docker containers, please use the Python 3 containers `*-py3` and install `scikit-learn` before running this.
+
+`python3 supervised.py`
 
 ### Simple Implementation for Studying Purpose
 - It includes training/testing on the cora dataset.
