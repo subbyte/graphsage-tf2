@@ -18,9 +18,9 @@ def build_batch(num_layers, nodes, neigh_dict, sample_size):
     """
     
     dst_nodes = [nodes]
-    dstsrc2dst = []
-    dstsrc2src = []
-    dif_mat = []
+    dstsrc2dsts = []
+    dstsrc2srcs = []
+    dif_mats = []
 
     for _ in range(num_layers):
         ds, d2d, d2s, dm = compute_diffusion_matrix_mean ( dst_nodes[-1]
@@ -28,16 +28,16 @@ def build_batch(num_layers, nodes, neigh_dict, sample_size):
                                                          , sample_size
                                                          )
         dst_nodes.append(ds)
-        dstsrc2dst.append(d2d)
-        dstsrc2src.append(d2s)
-        dif_mat.append(dm)
+        dstsrc2dsts.append(d2d)
+        dstsrc2srcs.append(d2s)
+        dif_mats.append(dm)
 
     src_nodes = dst_nodes.pop()
     
     MiniBatchFields = ["src_nodes", "dif_mats", "dstsrc2srcs", "dstsrc2dsts"]
     MiniBatch = collections.namedtuple ("MiniBatch", MiniBatchFields)
 
-    return MiniBatch(src_nodes, dif_mat, dstsrc2src, dstsrc2dst)
+    return MiniBatch(src_nodes, dif_mats, dstsrc2srcs, dstsrc2dsts)
 
 ################################################################
 #                       Private Functions                      #
