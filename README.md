@@ -10,7 +10,9 @@ This is a TensorFlow 2 implementation of graphsage-simple in Python 3:
 
 It requires both `tensorflow` and `scikit-learn` packages. If you are using TensorFlow docker containers, please use the Python 3 containers `*-py3` and install `scikit-learn` before running this.
 
-`python3 supervised.py`
+```
+python3 supervised.py
+```
 
 ### Simple Implementation for Studying Purpose
 - It includes training/testing on the cora dataset.
