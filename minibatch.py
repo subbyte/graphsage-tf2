@@ -23,7 +23,7 @@ def build_batch(num_layers, nodes, neigh_dict, sample_size):
     dif_mats = []
 
     for _ in range(num_layers):
-        ds, d2d, d2s, dm = compute_diffusion_matrix_mean ( dst_nodes[-1]
+        ds, d2d, d2s, dm = _compute_diffusion_matrix_mean ( dst_nodes[-1]
                                                          , neigh_dict
                                                          , sample_size
                                                          )
@@ -43,8 +43,8 @@ def build_batch(num_layers, nodes, neigh_dict, sample_size):
 #                       Private Functions                      #
 ################################################################
 
-def compute_diffusion_matrix_mean(dst_nodes, neigh_dict, sample_size):
-    neigh_mat = sample_neighbors(dst_nodes, neigh_dict, sample_size)
+def _compute_diffusion_matrix_mean(dst_nodes, neigh_dict, sample_size):
+    neigh_mat = _sample_neighbors(dst_nodes, neigh_dict, sample_size)
     neigh_bool = np.any(neigh_mat.astype(np.bool), axis=0)
 
     # compute diffusion matrix
@@ -60,7 +60,7 @@ def compute_diffusion_matrix_mean(dst_nodes, neigh_dict, sample_size):
 
     return dstsrc, dstsrc2dst, dstsrc2src, dif_mat
 
-def sample_neighbors(nodes, neigh_dict, sample_size):
+def _sample_neighbors(nodes, neigh_dict, sample_size):
     """
     return a sampled adjacency matrix from nodes to its neighbors
     """
