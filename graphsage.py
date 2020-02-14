@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import tensorflow as tf
+from utils import compute_diffusion_matrix
 
 init_fn = tf.keras.initializers.GlorotUniform
 
