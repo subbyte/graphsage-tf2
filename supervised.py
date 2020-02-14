@@ -45,6 +45,8 @@ def load_cora():
             paper2 = node_map[info[1]]
             adj_lists[paper1].add(paper2)
             adj_lists[paper2].add(paper1)
+
+    adj_lists = {k: np.array(list(v)) for k, v in adj_lists.items()}
     
     return num_nodes, feat_data, labels, len(label_map), adj_lists
 
