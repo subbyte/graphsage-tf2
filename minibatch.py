@@ -154,9 +154,12 @@ def _compute_diffusion_matrix(dst_nodes, neigh_dict, sample_size, max_node_id):
     dstsrc2dst = np.searchsorted(dstsrc, dst_nodes)
 
     return dstsrc, dstsrc2src, dstsrc2dst, dif_mat
+<<<<<<< HEAD
 
 def _get_neighbors(nodes, neigh_dict):
     """
     return an array of neighbors of all nodes in the input
     """
     return reduce(np.union1d, [neigh_dict[n] for n in nodes])
+=======
+>>>>>>> master
