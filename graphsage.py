@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import tensorflow as tf
-from utils import compute_diffusion_matrix
+from meanaggregate import compute_auxiliary_matrices as cam
 
 init_fn = tf.keras.initializers.GlorotUniform
 
@@ -18,6 +18,7 @@ class GraphSage(tf.keras.Model):
         super().__init__()
 
         self.input_layer = RawFeature(raw_features)
+        self.num_layers = num_layers
 
         self.seq_layers = []
         for i in range (1, num_layers + 1):
@@ -37,13 +38,21 @@ class GraphSage(tf.keras.Model):
         """
         :param [node] nodes: target nodes for embedding
         """
-        x = self.input_layer(tf.squeeze(minibatch.src_nodes))
+        # prepare diffusion and helper matrices/mappings
+        src_nodes, dstsrc2srcs, dstsrc2dsts, dif_mats = cam ( minibatch.dst
+                                                            , minibatch.neigh_dict
+                                                            , self.num_layers
+                                                            , minibatch.sample_size
+                                                            )
+
+        # forward propagation
+        x = self.input_layer(tf.squeeze(src_nodes))
 
         for aggregator_layer in self.seq_layers:
             x = aggregator_layer ( x
-                                 , minibatch.dstsrc2dsts.pop()
-                                 , minibatch.dstsrc2srcs.pop()
-                                 , minibatch.dif_mats.pop()
+                                 , dstsrc2dsts.pop()
+                                 , dstsrc2srcs.pop()
+                                 , dif_mats.pop()
                                  )
 
         y = self.classifier(x)
@@ -88,12 +97,12 @@ class MeanAggregator(tf.keras.layers.Layer):
     def call(self, dstsrc_features, dstsrc2dst, dstsrc2src, dif_mat):
         """
         :param tensor dstsrc_features: the embedding from the previous layer
-        :param tensor dstsrc2dst: 1d boolean mask (prepraed by minibatch generator)
-        :param tensor dstsrc2src: 1d boolean mask (prepraed by minibatch generator)
+        :param tensor dstsrc2dst: 1d index mapping
+        :param tensor dstsrc2src: 1d index mapping
         :param tensor dif_mat: 2d diffusion matrix (prepraed by minibatch generator)
         """
-        dst_features = tf.boolean_mask(dstsrc_features, dstsrc2dst)
-        src_features = tf.boolean_mask(dstsrc_features, dstsrc2src)
+        dst_features = tf.gather(dstsrc_features, dstsrc2dst)
+        src_features = tf.gather(dstsrc_features, dstsrc2src)
         aggregated_features = tf.matmul(dif_mat, src_features)
         concatenated_features = tf.concat([aggregated_features, dst_features], 1)
         x = tf.matmul(concatenated_features, self.w)

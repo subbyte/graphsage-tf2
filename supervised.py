@@ -5,10 +5,9 @@ import tensorflow as tf
 import random
 import time
 from itertools import islice
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from sklearn.metrics import f1_score
 
-from minibatch import build_batch
 from graphsage import GraphSage
 
 #### NN parameters
@@ -20,6 +19,11 @@ NUM_LAYERS = 2
 BATCH_SIZE = 256
 TRAINING_STEPS = 100
 LEARNING_RATE = 0.5
+
+def build_batch(nodes, neigh_dict, sample_size):
+    MiniBatchFields = ["dst", "neigh_dict", "sample_size"]
+    MiniBatch = namedtuple ("MiniBatch", MiniBatchFields)
+    return MiniBatch(np.array(nodes), neigh_dict, sample_size)
 
 def load_cora():
     num_nodes = 2708
@@ -45,6 +49,8 @@ def load_cora():
             paper2 = node_map[info[1]]
             adj_lists[paper1].add(paper2)
             adj_lists[paper2].add(paper1)
+
+    adj_lists = {k: np.array(list(v)) for k, v in adj_lists.items()}
     
     return num_nodes, feat_data, labels, len(label_map), adj_lists
 
@@ -62,7 +68,7 @@ def run_cora():
         random.shuffle(nodes_for_training)
         while True:
             mini_batch_nodes = nodes_for_training[:batch_size]
-            batch = build_batch(NUM_LAYERS, mini_batch_nodes, neigh_dict, SAMPLE_SIZE)
+            batch = build_batch(mini_batch_nodes, neigh_dict, SAMPLE_SIZE)
             labels = all_labels[mini_batch_nodes]
             yield (batch, labels)
 
@@ -85,7 +91,7 @@ def run_cora():
         print("Loss:", loss.numpy())
 
     # testing
-    results = graphsage(build_batch(NUM_LAYERS, test_nodes, neigh_dict, SAMPLE_SIZE))
+    results = graphsage(build_batch(test_nodes, neigh_dict, SAMPLE_SIZE))
     score = f1_score(labels[test_nodes], results.numpy().argmax(axis=1), average="micro")
     print("Validation F1: ", score)
     print("Average batch time: ", np.mean(times))
