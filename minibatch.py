@@ -53,26 +53,6 @@ def build_batch_from_nodes(num_layers, nodes, neigh_dict, sample_size):
 ################################################################
 
 def _compute_diffusion_matrix(dst_nodes, neigh_dict, sample_size, max_node_id):
-    neigh_mat = _sample_neighbors(dst_nodes, neigh_dict, sample_size, max_node_id)
-    neigh_bool = np.any(neigh_mat.astype(np.bool), axis=0)
-
-    # compute diffusion matrix
-    neigh_mat_scoped = neigh_mat[:, neigh_bool]
-    neigh_mat_scoped_sum = np.sum(neigh_mat_scoped, axis=1, keepdims=True)
-    dif_mat = neigh_mat_scoped / neigh_mat_scoped_sum
-
-    # compute dstsrc mappings
-    src_nodes = np.arange(neigh_bool.size)[neigh_bool]
-    dstsrc = np.union1d(dst_nodes, src_nodes)
-    dstsrc2src = np.any(np.stack([(dstsrc == n) for n in src_nodes]), axis=0)
-    dstsrc2dst = np.any(np.stack([(dstsrc == n) for n in dst_nodes]), axis=0)
-
-    return dstsrc, dstsrc2src, dstsrc2dst, dif_mat
-
-def _sample_neighbors(nodes, neigh_dict, sample_size, max_node_id):
-    """
-    return a sampled adjacency matrix from nodes to its neighbors
-    """
 
     def sample(ns):
         return np.random.choice(ns, min(len(ns), sample_size), replace=False)
@@ -82,4 +62,20 @@ def _sample_neighbors(nodes, neigh_dict, sample_size, max_node_id):
         v[ns] = 1
         return v
 
-    return np.stack([vectorize(sample(neigh_dict[n])) for n in nodes])
+    # sample neighbors
+    adj_mat_full = np.stack([vectorize(sample(neigh_dict[n])) for n in dst_nodes])
+    nonzero_cols_mask = np.any(adj_mat_full.astype(np.bool), axis=0)
+
+    # compute diffusion matrix
+    adj_mat = adj_mat_full[:, nonzero_cols_mask]
+    adj_mat_sum = np.sum(adj_mat, axis=1, keepdims=True)
+    dif_mat = adj_mat / adj_mat_sum
+
+    # compute dstsrc mappings
+    src_nodes = np.arange(nonzero_cols_mask.size)[nonzero_cols_mask]
+    # np.union1d automatic sort the return, which is required for np.searchsorted
+    dstsrc = np.union1d(dst_nodes, src_nodes)
+    dstsrc2src = np.searchsorted(dstsrc, src_nodes)
+    dstsrc2dst = np.searchsorted(dstsrc, dst_nodes)
+
+    return dstsrc, dstsrc2src, dstsrc2dst, dif_mat

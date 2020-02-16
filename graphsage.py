@@ -87,12 +87,12 @@ class MeanAggregator(tf.keras.layers.Layer):
     def call(self, dstsrc_features, dstsrc2dst, dstsrc2src, dif_mat):
         """
         :param tensor dstsrc_features: the embedding from the previous layer
-        :param tensor dstsrc2dst: 1d boolean mask (prepraed by minibatch generator)
-        :param tensor dstsrc2src: 1d boolean mask (prepraed by minibatch generator)
+        :param tensor dstsrc2dst: 1d index mapping (prepraed by minibatch generator)
+        :param tensor dstsrc2src: 1d index mapping (prepraed by minibatch generator)
         :param tensor dif_mat: 2d diffusion matrix (prepraed by minibatch generator)
         """
-        dst_features = tf.boolean_mask(dstsrc_features, dstsrc2dst)
-        src_features = tf.boolean_mask(dstsrc_features, dstsrc2src)
+        dst_features = tf.gather(dstsrc_features, dstsrc2dst)
+        src_features = tf.gather(dstsrc_features, dstsrc2src)
         aggregated_features = tf.matmul(dif_mat, src_features)
         concatenated_features = tf.concat([aggregated_features, dst_features], 1)
         x = tf.matmul(concatenated_features, self.w)
