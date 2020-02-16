@@ -73,7 +73,7 @@ def _compute_diffusion_matrix(dst_nodes, neigh_dict, sample_size, max_node_id):
 
     # compute dstsrc mappings
     src_nodes = np.arange(nonzero_cols_mask.size)[nonzero_cols_mask]
-    # np.union1d automatic sort the return, which is required for np.searchsorted
+    # np.union1d automatic sorts the return, which is required for np.searchsorted
     dstsrc = np.union1d(dst_nodes, src_nodes)
     dstsrc2src = np.searchsorted(dstsrc, src_nodes)
     dstsrc2dst = np.searchsorted(dstsrc, dst_nodes)
