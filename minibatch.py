@@ -59,9 +59,9 @@ def build_batch_from_edges(num_layers, edges, neigh_dict, sample_size, neg_size)
 
     # np.union1d automatic sorts the return, which is required for np.searchsorted
     batch_all = reduce(np.union1d, (batchA, batchB, batchN))
-    # order does not matter, in the model, use tf.gather on this
+    # order does matter, in the model, use tf.gather on this
     dst2batchA = np.searchsorted(batch_all, batchA)
-    # order does not matter, in the model, use tf.gather on this
+    # order does matter, in the model, use tf.gather on this
     dst2batchB = np.searchsorted(batch_all, batchB)
     # order does not matter, in the model, use tf.boolean_mask on this
     dst2batchN = np.in1d(batch_all, batchN)
