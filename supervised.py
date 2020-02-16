@@ -8,7 +8,7 @@ from itertools import islice
 from collections import defaultdict
 from sklearn.metrics import f1_score
 
-from minibatch import build_batch_from_nodes
+from minibatch import build_batch_from_nodes as build_batch
 from graphsage import GraphSage
 
 #### NN parameters
@@ -64,7 +64,7 @@ def run_cora():
         random.shuffle(nodes_for_training)
         while True:
             mini_batch_nodes = nodes_for_training[:batch_size]
-            batch = build_batch_from_nodes(NUM_LAYERS, mini_batch_nodes, neigh_dict, SAMPLE_SIZE)
+            batch = build_batch(NUM_LAYERS, mini_batch_nodes, neigh_dict, SAMPLE_SIZE)
             labels = all_labels[mini_batch_nodes]
             yield (batch, labels)
 
@@ -87,7 +87,7 @@ def run_cora():
         print("Loss:", loss.numpy())
 
     # testing
-    results = graphsage(build_batch_from_nodes(NUM_LAYERS, test_nodes, neigh_dict, SAMPLE_SIZE))
+    results = graphsage(build_batch(NUM_LAYERS, test_nodes, neigh_dict, SAMPLE_SIZE))
     score = f1_score(labels[test_nodes], results.numpy().argmax(axis=1), average="micro")
     print("Validation F1: ", score)
     print("Average batch time: ", np.mean(times))
