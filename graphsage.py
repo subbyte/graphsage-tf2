@@ -6,7 +6,7 @@ init_fn = tf.keras.initializers.GlorotUniform
 
 class GraphSageBase(tf.keras.Model):
     """
-    GraphSage base model without last layer
+    GraphSage base model outputing embeddings of given nodes
     """
 
     def __init__(self, raw_features, internal_dim, num_layers, last_has_activ):
@@ -135,10 +135,10 @@ class UnsupervisedTrainLoss(tf.keras.layers.Layer):
         """
         compute and return the loss based on Eq (1) in the GraphSage paper
 
-        :param 1d-tensor embeddingA: embedding of a list of nodes
-        :param 1d-tensor embeddingB: embedding of a list of neighbor nodes
+        :param 2d-tensor embeddingA: embedding of a list of nodes
+        :param 2d-tensor embeddingB: embedding of a list of neighbor nodes
                                      pairwise to embeddingA
-        :param 1d-tensor embeddingN: embedding of a list of non-neighbor nodes
+        :param 2d-tensor embeddingN: embedding of a list of non-neighbor nodes
                                      (negative samples) to embeddingA
         """
         # positive affinity: pair-wise calculation
