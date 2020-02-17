@@ -9,7 +9,7 @@ from collections import defaultdict
 from sklearn.metrics import f1_score
 
 from minibatch import build_batch_from_nodes as build_batch
-from graphsage import GraphSage
+from graphsage import GraphSageSupervised as GraphSage
 
 #### NN parameters
 SAMPLE_SIZE = 5
