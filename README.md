@@ -16,7 +16,7 @@ This is another GraphSAGE implementation
 ### How to Run 
 
 #### Supervised Version
-It requires both `python3`, `tensorflow` and `scikit-learn` packages.
+It requires `python3` with both `tensorflow` and `scikit-learn` packages.
 ```
 ./supervised.py
 ```
