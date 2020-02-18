@@ -28,6 +28,6 @@ python3 supervised.py
 
 ### Prilimary Performance Evaluation
 
-Given the same size of minibatch (256 units), this TensorFlow version is 25% faster on CPU. The average batch time in training with 32-core CPU:
+Given the same size of minibatch (256 units), this TensorFlow version is 35% faster on CPU. The average batch time in training with 32-core CPU:
 - graphsage-simple (PyTorch, [updated version](https://github.com/subbyte/graphsage-simple)): 0.038063554763793944s
-- graphsage-tf2 (TensorFlow): 0.02766340970993042s
+- graphsage-tf2 (TensorFlow): 0.02408278703689575s
