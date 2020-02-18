@@ -43,9 +43,9 @@ def build_batch_from_edges(num_layers, edges, neigh_dict, sample_size, neg_size)
       to a node in batchA/batchB.
     """
 
-    batchA, batchB = zip(*edges)
+    batchA, batchB = map(np.array, zip(*edges))
     possible_negs = reduce ( np.setdiff1d
-                           , ( neigh_dict.keys()
+                           , ( np.array(list(neigh_dict.keys()))
                              , batchA
                              , _get_neighbors(batchA, neigh_dict)
                              , batchB
