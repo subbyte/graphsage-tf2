@@ -7,7 +7,6 @@ GraphSAGE (original implementation): https://github.com/williamleif/GraphSAGE
 This is another GraphSAGE implementation
 - Simplifying things for studying purpose
     - It includes the toy cora dataset
-    - It only run in the supervised mode (unsupervised mode planned)
     - It only has MeanAggregator
     - It only has CPU support
 - Number of layers as a hyperparameter
@@ -16,10 +15,15 @@ This is another GraphSAGE implementation
 
 ### How to Run 
 
-It requires both `tensorflow` and `scikit-learn` packages.
-
+#### Supervised Version
+It requires both `python3`, `tensorflow` and `scikit-learn` packages.
 ```
-python3 supervised.py
+./supervised.py
+```
+
+#### Unsupervised Version (Under Development)
+```
+./unsupervised.py
 ```
 
 ### Design Choices
@@ -28,6 +32,6 @@ python3 supervised.py
 
 ### Prilimary Performance Evaluation
 
-Given the same size of minibatch (256 units), this TensorFlow version is 35% faster on CPU. The average batch time in training with 32-core CPU:
+This implementation is 35% faster than the PyTorch version. Given the same size of minibatch (256 units), the average batch time in training with 32-core CPU:
 - graphsage-simple (PyTorch, [updated version](https://github.com/subbyte/graphsage-simple)): 0.038063554763793944s
 - graphsage-tf2 (TensorFlow): 0.02408278703689575s
