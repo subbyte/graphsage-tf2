@@ -142,7 +142,7 @@ class UnsupervisedTrainLoss(tf.keras.layers.Layer):
                                      (negative samples) to embeddingA
         """
         # positive affinity: pair-wise calculation
-        pos_affinity = tf.reduce_sum ( tf.math.multiply ( embeddingA, embeddingB ) )
+        pos_affinity = tf.reduce_sum ( tf.multiply ( embeddingA, embeddingB ), axis=1 )
         # negative affinity: enumeration of all combinations of (embeddingA, embeddingN)
         neg_affinity = tf.matmul ( embeddingA, tf.transpose ( embeddingN ) )
 
