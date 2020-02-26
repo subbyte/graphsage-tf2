@@ -65,7 +65,7 @@ class GraphSageUnsupervised(GraphSageBase):
         self.trainloss = UnsupervisedTrainLoss(neg_weight)
 
     def call(self, minibatch):
-        embeddingABN = super().call(minibatch)
+        embeddingABN = tf.math.l2_normalize(super().call(minibatch), 1)
         embeddingA = tf.gather(embeddingABN, minibatch.dst2batchA)
         embeddingB = tf.gather(embeddingABN, minibatch.dst2batchB)
         embeddingN = tf.boolean_mask(embeddingABN, minibatch.dst2batchN)

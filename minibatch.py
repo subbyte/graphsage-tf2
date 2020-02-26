@@ -10,17 +10,16 @@ import numpy as np
 import collections
 from functools import reduce
 
-def build_batch_from_edges(num_layers, edges, neigh_dict, sample_size, neg_size):
+def build_batch_from_edges(edges, neigh_dict, sample_sizes, neg_size):
     """
     This batch method is used for unsupervised mode. First, it prepares
     auxiliary matrices for the combination of neighbor nodes (read from edges)
     and negative sample nodes. Second, it provides mappings to filter the
     results into three portions for use in the unsupervised loss function.
 
-    :param int num_layers: number of layers
     :param [(int, int)] edges: edge with node ids
     :param {node:[node]} neigh_dict: BIDIRECTIONAL adjacency matrix in dict
-    :param int sample_size: sample size
+    :param [sample_size]: sample sizes for each layer, lens is the number of layers
     :param int neg_size: size of batchN
     :return namedtuple minibatch (3 more additional elements to supervised mode)
         "src_nodes": node ids to retrieve from raw feature and feed to the first layer
@@ -66,10 +65,9 @@ def build_batch_from_edges(num_layers, edges, neigh_dict, sample_size, neg_size)
     # order does not matter, in the model, use tf.boolean_mask on this
     dst2batchN = np.in1d(batch_all, batchN)
 
-    minibatch_plain = build_batch_from_nodes ( num_layers
-                                             , batch_all
+    minibatch_plain = build_batch_from_nodes ( batch_all
                                              , neigh_dict
-                                             , sample_size
+                                             , sample_sizes
                                              )
 
     MiniBatchFields = [ "src_nodes", "dstsrc2srcs", "dstsrc2dsts", "dif_mats"
@@ -85,12 +83,11 @@ def build_batch_from_edges(num_layers, edges, neigh_dict, sample_size, neg_size)
                      , dst2batchN
                      )
 
-def build_batch_from_nodes(num_layers, nodes, neigh_dict, sample_size):
+def build_batch_from_nodes(nodes, neigh_dict, sample_sizes):
     """
-    :param int num_layers: number of layers
     :param [int] nodes: node ids
     :param {node:[node]} neigh_dict: BIDIRECTIONAL adjacency matrix in dict
-    :param int sample_size: sample size
+    :param [sample_size]: sample sizes for each layer, lens is the number of layers
     :return namedtuple minibatch
         "src_nodes": node ids to retrieve from raw feature and feed to the first layer
         "dstsrc2srcs": list of dstsrc2src matrices from last to first layer
@@ -105,7 +102,7 @@ def build_batch_from_nodes(num_layers, nodes, neigh_dict, sample_size):
 
     max_node_id = max(list(neigh_dict.keys()))
 
-    for _ in range(num_layers):
+    for sample_size in reversed(sample_sizes):
         ds, d2s, d2d, dm = _compute_diffusion_matrix ( dst_nodes[-1]
                                                      , neigh_dict
                                                      , sample_size

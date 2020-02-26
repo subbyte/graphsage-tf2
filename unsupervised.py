@@ -12,21 +12,20 @@ from minibatch import build_batch_from_edges as build_batch
 from graphsage import GraphSageUnsupervised as GraphSage
 
 #### NN parameters
-SAMPLE_SIZE = 10
+SAMPLE_SIZES = [25, 10]
 INTERNAL_DIM = 128
-NUM_LAYERS = 2
 NEG_WEIGHT = 1.0
 #### training parameters
 BATCH_SIZE = 512
 NEG_SIZE = 20
 TRAINING_STEPS = 1000
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.0001
 
-def generate_training_minibatch(adj_mat_dict, batch_size, num_layer, sample_size, neg_size):
+def generate_training_minibatch(adj_mat_dict, batch_size, sample_sizes, neg_size):
     edges = [(k, v) for k in adj_mat_dict for v in adj_mat_dict[k]]
     while True:
         mini_batch_edges = random.sample(edges, batch_size)
-        batch = build_batch(num_layer, mini_batch_edges, adj_mat_dict, sample_size, neg_size)
+        batch = build_batch(mini_batch_edges, adj_mat_dict, sample_sizes, neg_size)
         yield batch
 
 def run_cora():
@@ -34,12 +33,11 @@ def run_cora():
 
     minibatch_generator = generate_training_minibatch ( neigh_dict
                                                       , BATCH_SIZE
-                                                      , NUM_LAYERS
-                                                      , SAMPLE_SIZE
+                                                      , SAMPLE_SIZES
                                                       , NEG_SIZE
                                                       )
 
-    graphsage = GraphSage(raw_features, INTERNAL_DIM, NUM_LAYERS, NEG_WEIGHT)
+    graphsage = GraphSage(raw_features, INTERNAL_DIM, len(SAMPLE_SIZES), NEG_WEIGHT)
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE)
 
