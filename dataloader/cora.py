@@ -3,6 +3,8 @@
 import numpy as np
 from collections import defaultdict
 
+datapath = "datasamples/cora"
+
 def load_cora():
     num_nodes = 2708
     num_feats = 1433
@@ -10,7 +12,7 @@ def load_cora():
     labels = np.empty((num_nodes,1), dtype=np.int64)
     node_map = {}
     label_map = {}
-    with open("cora/cora.content") as fp:
+    with open(datapath + "/cora.content") as fp:
         for i,line in enumerate(fp):
             info = line.strip().split()
             feat_data[i,:] = list(map(float, info[1:-1]))
@@ -20,7 +22,7 @@ def load_cora():
             labels[i] = label_map[info[-1]]
 
     adj_lists = defaultdict(set)
-    with open("cora/cora.cites") as fp:
+    with open(datapath + "/cora.cites") as fp:
         for i,line in enumerate(fp):
             info = line.strip().split()
             paper1 = node_map[info[0]]

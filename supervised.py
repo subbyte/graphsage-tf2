@@ -6,7 +6,7 @@ import time
 from itertools import islice
 from sklearn.metrics import f1_score
 
-from dataloader import load_cora
+from dataloader.cora import load_cora
 from minibatch import build_batch_from_nodes as build_batch
 from graphsage import GraphSageSupervised as GraphSage
 
