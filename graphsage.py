@@ -152,4 +152,9 @@ class UnsupervisedTrainLoss(tf.keras.layers.Layer):
         neg_xent = tf.nn.sigmoid_cross_entropy_with_logits ( tf.zeros_like(neg_affinity)
                                                            , neg_affinity
                                                            , "negative_xent" )
-        return tf.reduce_sum(pos_xent) + self.neg_weight * tf.reduce_sum(neg_xent)
+        batch_loss = tf.reduce_sum(pos_xent) + self.neg_weight * tf.reduce_sum(neg_xent)
+
+        # additional operation: GraphSAGE:models.py line 378
+        loss = batch_loss / embeddingA.shape[0]
+
+        return loss

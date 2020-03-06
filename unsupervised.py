@@ -7,9 +7,11 @@ import time
 from itertools import islice
 from sklearn.metrics import f1_score
 
-from dataloader import load_cora
+from dataloader.cora import load_cora
+from dataloader.ppi import load_ppi
 from minibatch import build_batch_from_edges as build_batch
 from graphsage import GraphSageUnsupervised as GraphSage
+from config import ENABLE_UNKNOWN_OP
 
 #### NN parameters
 SAMPLE_SIZES = [25, 10]
@@ -19,7 +21,7 @@ NEG_WEIGHT = 1.0
 BATCH_SIZE = 512
 NEG_SIZE = 20
 TRAINING_STEPS = 1000
-LEARNING_RATE = 0.0001
+LEARNING_RATE = 0.00001
 
 def generate_training_minibatch(adj_mat_dict, batch_size, sample_sizes, neg_size):
     edges = [(k, v) for k in adj_mat_dict for v in adj_mat_dict[k]]
@@ -29,7 +31,12 @@ def generate_training_minibatch(adj_mat_dict, batch_size, sample_sizes, neg_size
         yield batch
 
 def run_cora():
-    num_nodes, raw_features, labels, num_classes, neigh_dict = load_cora()
+    # num_nodes, raw_features, labels, num_classes, neigh_dict = load_cora()
+    num_nodes, raw_features, neigh_dict = load_ppi()
+
+    if ENABLE_UNKNOWN_OP:
+        # /graphsage/unsupervised_train.py, line 139
+        raw_features = np.vstack([raw_features, np.zeros((raw_features.shape[1],))])
 
     minibatch_generator = generate_training_minibatch ( neigh_dict
                                                       , BATCH_SIZE
