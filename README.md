@@ -19,7 +19,7 @@ It requires `python3` with both `tensorflow` and `scikit-learn` packages.
 ./supervised.py
 ```
 
-#### Unsupervised Version (Under Development)
+#### Unsupervised Version
 ```
 ./unsupervised.py
 ```
