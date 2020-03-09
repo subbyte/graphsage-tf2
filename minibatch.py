@@ -44,8 +44,9 @@ def build_batch_from_edges(edges, nodes, neigh_dict, sample_sizes, neg_size):
     """
 
     batchA, batchB = edges.transpose()
+
     possible_negs = reduce ( np.setdiff1d
-                           , ( nodes 
+                           , ( nodes
                              , batchA
                              , _get_neighbors(batchA, neigh_dict)
                              , batchB
@@ -57,8 +58,8 @@ def build_batch_from_edges(edges, nodes, neigh_dict, sample_sizes, neg_size):
                               , replace=False
                               )
 
-    # np.union1d automatic sorts the return, which is required for np.searchsorted
-    batch_all = reduce(np.union1d, (batchA, batchB, batchN))
+    # np.unique sorts the return, required by the following np.searchsorted
+    batch_all = np.unique(np.concatenate((batchA, batchB, batchN)))
     # order does matter, in the model, use tf.gather on this
     dst2batchA = np.searchsorted(batch_all, batchA)
     # order does matter, in the model, use tf.gather on this
