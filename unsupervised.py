@@ -2,7 +2,6 @@
 
 import numpy as np
 import tensorflow as tf
-import random
 import time
 from itertools import islice
 from sklearn.metrics import f1_score
@@ -20,14 +19,15 @@ NEG_WEIGHT = 1.0
 #### training parameters
 BATCH_SIZE = 512
 NEG_SIZE = 20
-TRAINING_STEPS = 1000
+TRAINING_STEPS = 100
 LEARNING_RATE = 0.00001
 
 def generate_training_minibatch(adj_mat_dict, batch_size, sample_sizes, neg_size):
-    edges = [(k, v) for k in adj_mat_dict for v in adj_mat_dict[k]]
+    edges = np.array([(k, v) for k in adj_mat_dict for v in adj_mat_dict[k]])
+    nodes = np.array(list(adj_mat_dict.keys()))
     while True:
-        mini_batch_edges = random.sample(edges, batch_size)
-        batch = build_batch(mini_batch_edges, adj_mat_dict, sample_sizes, neg_size)
+        mini_batch_edges = edges[np.random.randint(edges.shape[0], size = batch_size), :]
+        batch = build_batch(mini_batch_edges, nodes, adj_mat_dict, sample_sizes, neg_size)
         yield batch
 
 def run_cora():

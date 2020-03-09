@@ -10,14 +10,15 @@ import numpy as np
 import collections
 from functools import reduce
 
-def build_batch_from_edges(edges, neigh_dict, sample_sizes, neg_size):
+def build_batch_from_edges(edges, nodes, neigh_dict, sample_sizes, neg_size):
     """
     This batch method is used for unsupervised mode. First, it prepares
     auxiliary matrices for the combination of neighbor nodes (read from edges)
     and negative sample nodes. Second, it provides mappings to filter the
     results into three portions for use in the unsupervised loss function.
 
-    :param [(int, int)] edges: edge with node ids
+    :param array([(int, int)]) edges: edge with node ids
+    :param array([int]) nodes: all node ids
     :param {node:[node]} neigh_dict: BIDIRECTIONAL adjacency matrix in dict
     :param [sample_size]: sample sizes for each layer, lens is the number of layers
     :param int neg_size: size of batchN
@@ -42,9 +43,9 @@ def build_batch_from_edges(edges, neigh_dict, sample_sizes, neg_size):
       to a node in batchA/batchB.
     """
 
-    batchA, batchB = map(np.array, zip(*edges))
+    batchA, batchB = edges.transpose()
     possible_negs = reduce ( np.setdiff1d
-                           , ( np.array(list(neigh_dict.keys()))
+                           , ( nodes 
                              , batchA
                              , _get_neighbors(batchA, neigh_dict)
                              , batchB
