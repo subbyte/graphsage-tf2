@@ -62,14 +62,18 @@ class GraphSageSupervised(GraphSageBase):
 class GraphSageUnsupervised(GraphSageBase):
     def __init__(self, raw_features, internal_dim, num_layers, neg_weight):
         super().__init__(raw_features, internal_dim, num_layers, False)
-        self.trainloss = UnsupervisedTrainLoss(neg_weight)
+        self.neg_weight = neg_weight
 
     def call(self, minibatch):
         embeddingABN = tf.math.l2_normalize(super().call(minibatch), 1)
-        embeddingA = tf.gather(embeddingABN, minibatch.dst2batchA)
-        embeddingB = tf.gather(embeddingABN, minibatch.dst2batchB)
-        embeddingN = tf.boolean_mask(embeddingABN, minibatch.dst2batchN)
-        return self.trainloss(embeddingA, embeddingB, embeddingN)
+        self.add_loss (
+                compute_uloss ( tf.gather(embeddingABN, minibatch.dst2batchA)
+                              , tf.gather(embeddingABN, minibatch.dst2batchB)
+                              , tf.boolean_mask(embeddingABN, minibatch.dst2batchN)
+                              , self.neg_weight
+                              )
+                )
+        return embeddingABN
 
 ################################################################
 #                         Custom Layers                        #
@@ -119,42 +123,36 @@ class MeanAggregator(tf.keras.layers.Layer):
         return self.activ_fn(x)
 
 ################################################################
-#                   Custom Layers (Unsupervised)               #
+#               Custom Loss Function (Unsupervised)            #
 ################################################################
 
-class UnsupervisedTrainLoss(tf.keras.layers.Layer):
+@tf.function 
+def compute_uloss(embeddingA, embeddingB, embeddingN, neg_weight):
     """
-    Implement the loss function of unsupervised training as a layer
+    compute and return the loss for unspervised model based on Eq (1) in the
+    GraphSage paper
+
+    :param 2d-tensor embeddingA: embedding of a list of nodes
+    :param 2d-tensor embeddingB: embedding of a list of neighbor nodes
+                                 pairwise to embeddingA
+    :param 2d-tensor embeddingN: embedding of a list of non-neighbor nodes
+                                 (negative samples) to embeddingA
+    :param float neg_weight: negative weight
     """
+    # positive affinity: pair-wise calculation
+    pos_affinity = tf.reduce_sum ( tf.multiply ( embeddingA, embeddingB ), axis=1 )
+    # negative affinity: enumeration of all combinations of (embeddingA, embeddingN)
+    neg_affinity = tf.matmul ( embeddingA, tf.transpose ( embeddingN ) )
 
-    def __init__(self, neg_weight, **kwargs):
-        super().__init__(trainable=False, **kwargs)
-        self.neg_weight = neg_weight
+    pos_xent = tf.nn.sigmoid_cross_entropy_with_logits ( tf.ones_like(pos_affinity)
+                                                       , pos_affinity
+                                                       , "positive_xent" )
+    neg_xent = tf.nn.sigmoid_cross_entropy_with_logits ( tf.zeros_like(neg_affinity)
+                                                       , neg_affinity
+                                                       , "negative_xent" )
 
-    def call(self, embeddingA, embeddingB, embeddingN):
-        """
-        compute and return the loss based on Eq (1) in the GraphSage paper
+    weighted_neg = tf.multiply ( neg_weight, tf.reduce_sum(neg_xent) )
+    batch_loss = tf.add ( tf.reduce_sum(pos_xent), weighted_neg )
 
-        :param 2d-tensor embeddingA: embedding of a list of nodes
-        :param 2d-tensor embeddingB: embedding of a list of neighbor nodes
-                                     pairwise to embeddingA
-        :param 2d-tensor embeddingN: embedding of a list of non-neighbor nodes
-                                     (negative samples) to embeddingA
-        """
-        # positive affinity: pair-wise calculation
-        pos_affinity = tf.reduce_sum ( tf.multiply ( embeddingA, embeddingB ), axis=1 )
-        # negative affinity: enumeration of all combinations of (embeddingA, embeddingN)
-        neg_affinity = tf.matmul ( embeddingA, tf.transpose ( embeddingN ) )
-
-        pos_xent = tf.nn.sigmoid_cross_entropy_with_logits ( tf.ones_like(pos_affinity)
-                                                           , pos_affinity
-                                                           , "positive_xent" )
-        neg_xent = tf.nn.sigmoid_cross_entropy_with_logits ( tf.zeros_like(neg_affinity)
-                                                           , neg_affinity
-                                                           , "negative_xent" )
-        batch_loss = tf.reduce_sum(pos_xent) + self.neg_weight * tf.reduce_sum(neg_xent)
-
-        # additional operation: GraphSAGE:models.py line 378
-        loss = batch_loss / embeddingA.shape[0]
-
-        return loss
+    # per batch loss: GraphSAGE:models.py line 378
+    return tf.divide ( batch_loss, embeddingA.shape[0] )

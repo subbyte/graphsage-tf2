@@ -53,7 +53,9 @@ def run_cora():
     for minibatch in islice(minibatch_generator, 0, TRAINING_STEPS):
         start_time = time.time()
         with tf.GradientTape() as tape:
-            loss = graphsage(minibatch)
+            _ = graphsage(minibatch)
+            loss = graphsage.losses[0]
+
         grads = tape.gradient(loss, graphsage.trainable_weights)
         optimizer.apply_gradients(zip(grads, graphsage.trainable_weights))
         end_time = time.time()
