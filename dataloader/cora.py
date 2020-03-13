@@ -23,7 +23,7 @@ def load_cora():
 
     adj_lists = defaultdict(set)
     with open(datapath + "/cora.cites") as fp:
-        for i,line in enumerate(fp):
+        for line in fp:
             info = line.strip().split()
             paper1 = node_map[info[0]]
             paper2 = node_map[info[1]]

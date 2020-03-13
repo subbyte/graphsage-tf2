@@ -158,4 +158,4 @@ def _get_neighbors(nodes, neigh_dict):
     """
     return an array of neighbors of all nodes in the input
     """
-    return reduce(np.union1d, [neigh_dict[n] for n in nodes])
+    return np.unique(np.concatenate([neigh_dict[n] for n in nodes]))

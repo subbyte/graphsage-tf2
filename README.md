@@ -30,12 +30,9 @@ It requires `python3` with both `tensorflow` and `scikit-learn` packages.
 
 ### Prilimary Performance Evaluation (CPU)
 
-This implementation is 23% faster than GraphSage [original implementation](https://github.com/williamleif/GraphSAGE/)
-- minibatch size 512 units, average batch time on a 32-vcore testbed:
-- [GraphSage](https://github.com/williamleif/GraphSAGE): 0.05997s
-- graphsage-tf2 (this one): 0.04643s
-
-This implementation is 35% faster than [graphsage-simple](https://github.com/williamleif/graphsage-simple/) (PyTorch version of GraphSage)
-- minibatch size 256 units, average batch time on a 32-vcore testbed:
+The supervised part is 35% faster than [graphsage-simple](https://github.com/williamleif/graphsage-simple/) (PyTorch version of GraphSage)
+- cora dataset, minibatch size 256 units, average batch time on a 32-vcore testbed:
 - graphsage-simple [updated version](https://github.com/subbyte/graphsage-simple): 0.03806s
 - graphsage-tf2 (this one): 0.02408s
+
+This unsupervised part is much slower than GraphSage [original implementation](https://github.com/williamleif/GraphSAGE/) and cannot parallelize well with multi-core CPU. It is under investigation.

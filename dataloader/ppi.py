@@ -19,7 +19,7 @@ def load_ppi():
 
     adj_lists = defaultdict(set)
     with open(datapath + "/toy-ppi-walks.txt") as fp:
-        for i,line in enumerate(fp):
+        for line in fp:
             info = line.strip().split()
             item1 = int(info[0])
             item2 = int(info[1])

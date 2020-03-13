@@ -31,7 +31,7 @@ def generate_training_minibatch(adj_mat_dict, batch_size, sample_sizes, neg_size
         yield batch
 
 def run_cora():
-    # num_nodes, raw_features, labels, num_classes, neigh_dict = load_cora()
+    # num_nodes, raw_features, _, _, neigh_dict = load_cora()
     num_nodes, raw_features, neigh_dict = load_ppi()
 
     if ENABLE_UNKNOWN_OP:
